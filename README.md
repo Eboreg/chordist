@@ -11,7 +11,7 @@ em = BanjoChord("Em", (2, 1, 2), (2, 4, 3))
 g = BanjoChord("G")
 ```
 
-... where the arguments to `BanjoChord` are the chord name followed by a tuple in the format `(fret number, string number, [finger number])` for each pressed string. The finger number can be omitted, in which case a `*` will be used. It can also be a string, for example `x` for muted strings.
+... where the arguments to `BanjoChord` are the chord name followed by a tuple in the format `(fret number, string number, [finger number])` for each pressed string. String numbers are counted from the top/left, which I am sure somebody will take issue with (feel free to change this in your own fork in that case). The finger number can be omitted, in which case a `*` will be used. It can also be a string, for example `x` for muted strings.
 
 To output the chords above:
 
