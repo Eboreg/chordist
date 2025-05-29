@@ -55,6 +55,14 @@ class Chord:
         for fret in range(self.start_fret, self.end_fret + 1):
             self.fret_rows.append(self.generate_fret(fret))
 
+    def __eq__(self, value):
+        return (
+            isinstance(value, Chord) and
+            value.string_count == self.string_count and
+            value.finger_map == self.finger_map and
+            value.ascii_name == self.ascii_name
+        )
+
     def generate_head(self, only_ascii: bool = False) -> str:
         name = self.ascii_name if only_ascii else self.name
         width = (self.string_count * 2) - 1
@@ -97,11 +105,13 @@ class Chord:
         return width
 
     @staticmethod
-    def find(name: str, chords: Iterable["Chord"]) -> "Chord | None":
-        for chord in chords:
-            if name in (chord.name, chord.ascii_name):
-                return chord
-        return None
+    def find(names: Iterable[str], chords: Iterable["Chord"]) -> "list[Chord]":
+        matches = []
+        for name in names:
+            for chord in chords:
+                if name in (chord.name, chord.ascii_name) and chord not in matches:
+                    matches.append(chord)
+        return matches
 
     @staticmethod
     def generate_matrix(

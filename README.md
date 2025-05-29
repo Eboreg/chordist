@@ -18,8 +18,8 @@ To output the chords above:
 ```python
 from chordist.banjo import Banjo
 
-banjo = Banjo()
-banjo.print_chord_matrix([em, g])
+banjo = Banjo([em, g])
+banjo.print_chord_matrix(["Em", "G"])
 ```
 
 This prints:
@@ -85,3 +85,7 @@ ___G___      __D⁷___      ___C___
 `print_lyrics()` also accepts an iterable of string iterables, in which case the outer iterables will be treated as separate verses and separated by blank rows.
 
 Some more examples in `abstract_instrument.py`.
+
+## Bugs/caveats
+
+Not yet able to render the high G string on a 5-string banjo in any useful way.

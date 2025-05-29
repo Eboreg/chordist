@@ -33,10 +33,10 @@ def split_lyrics_and_chords(
             if not idx % 2:
                 lyrics_row += part
             else:
-                chord = Chord.find(part, chords)
+                matching_chords = Chord.find([part], chords)
                 chord_name = part
-                if chord:
-                    chord_name = chord.ascii_name if only_ascii else chord.name
+                if matching_chords:
+                    chord_name = matching_chords[0].ascii_name if only_ascii else matching_chords[0].name
                 if chord_name not in chord_names:
                     chord_names.append(chord_name)
                 chords_row = f"{chords_row:{len(lyrics_row)}s}{chord_name}"

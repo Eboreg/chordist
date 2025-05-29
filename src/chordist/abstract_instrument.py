@@ -5,15 +5,16 @@ from typing import Iterable
 from chordist.chord import Chord
 from chordist.constants import MAXLEN, XPAD, YPAD
 from chordist.lyrics import split_lyrics_and_chords
-from chordist.utils import filter_not_none
 
 
 class AbstractInstrument(ABC):
-    base_chords: list[Chord]
+    chords: list[Chord]
     string_count: int
 
-    def __init__(self):
+    def __init__(self, custom_chords: Iterable[Chord] | None = None):
         self.min_chord_width = (self.string_count * 2) + 4
+        if custom_chords:
+            self.chords = [*custom_chords, *self.chords]
 
     def __call__(self):
         arg1 = sys.argv[1] if len(sys.argv) > 1 else None
@@ -25,29 +26,22 @@ class AbstractInstrument(ABC):
         else:
             self.print_chord_matrix()
 
-    def find_chord(self, name: str, chords: Iterable[Chord] | None = None) -> Chord | None:
-        return Chord.find(name, (chords or []) + self.base_chords)
-
-    def print_chord_matrix(self, chords: Iterable[Chord] | None = None, **kwargs):
-        Chord.print_matrix(chords or self.base_chords, min_chord_width=self.min_chord_width, **kwargs)
+    def print_chord_matrix(self, names: Iterable[str] | None = None, **kwargs):
+        chords = Chord.find(names, self.chords) if names else self.chords
+        Chord.print_matrix(chords, min_chord_width=self.min_chord_width, **kwargs)
 
     def print_lyrics(
         self,
         lyrics: Iterable[Iterable[str] | str],
         title: str = "",
-        chords: Iterable[Chord] | None = None,
         chords_on_top: bool = False,
         only_ascii: bool = False,
         maxlen: int = MAXLEN,
         xpad: int = XPAD,
         ypad: int = YPAD,
     ):
-        rows, chord_names = split_lyrics_and_chords(
-            lyrics,
-            chords=(chords or []) + self.base_chords,
-            only_ascii=only_ascii,
-        )
-        used_chords = filter_not_none(self.find_chord(c, chords) for c in chord_names)
+        rows, chord_names = split_lyrics_and_chords(lyrics, chords=self.chords, only_ascii=only_ascii)
+        used_chords = Chord.find(chord_names, self.chords)
         chord_matrix = "\n".join(
             Chord.generate_matrix(
                 used_chords,

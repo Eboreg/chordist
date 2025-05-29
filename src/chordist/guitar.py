@@ -9,7 +9,7 @@ class GuitarChord(Chord):
 
 class Guitar(AbstractInstrument):
     string_count = 6
-    base_chords = [
+    chords = [
         GuitarChord("A", (1, 1, "x"), (2, 3, 1), (2, 4, 2), (2, 5, 3)),
         GuitarChord("A⁷", (1, 1, "x"), (2, 3, 1), (2, 5, 2)),
         GuitarChord("Am", (1, 1, "x"), (1, 5, 1), (2, 3, 2), (2, 4, 3)),
