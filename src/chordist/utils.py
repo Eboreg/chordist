@@ -1,4 +1,4 @@
-from typing import Callable, Generator, Iterable, TypeVar
+from typing import Callable, Generator, Iterable, TypeVar, cast
 
 
 _T = TypeVar("_T")
@@ -26,4 +26,4 @@ def split_before(iterable: Iterable[_T], pred: Callable[[list[_T]], bool]) -> "G
 
 
 def filter_not_none(iterable: Iterable[_T | None]) -> Iterable[_T]:
-    return filter(lambda item: item is not None, iterable)
+    return cast(Iterable[_T], filter(lambda item: item is not None, iterable))

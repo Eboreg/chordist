@@ -7,34 +7,40 @@ A chord can be defined like so:
 ```python
 from chordist.banjo import BanjoChord
 
-em = BanjoChord("Em", (2, 1, 2), (2, 4, 3))
-g = BanjoChord("G")
+em = BanjoChord.create("Em", (2, 1, 2), (2, 4, 3))
+g = BanjoChord.create("G")
 ```
 
-... where the arguments to `BanjoChord` are the chord name followed by a tuple in the format `(fret number, string number, [finger number])` for each pressed string. String numbers are counted from the top/left, which I am sure somebody will take issue with (feel free to change this in your own fork in that case). The finger number can be omitted, in which case a `*` will be used. It can also be a string, for example `x` for muted strings.
+... where the arguments to `BanjoChord.create()` are the chord name followed by a tuple in the format `(fret number, string number, [finger number])` for each pressed string. String numbers are counted from the top/left, which I am sure somebody will take issue with (feel free to change this in your own fork in that case). The finger number can be omitted, in which case a `*` will be used. It can also be a string, for example `x` for muted strings.
 
 To output the chords above:
 
 ```python
-from chordist.banjo import Banjo
+from chordist.instrument_chord import InstrumentChordCollection
 
-banjo = Banjo([em, g])
-banjo.print_chord_matrix(["Em", "G"])
+chords = InstrumentChordCollection(em, g)
+chords.print_matrix()
 ```
 
 This prints:
 
 ```
-__Em___      ___G___
-| | | |      | | | |
-2 | | 3      | | | |
-| | | |      | | | |
-| | | |      | | | |
+__Em___       ___G___
+| | | |       | | | |
+2 | | 3       | | | |
+| | | |       | | | |
+| | | |       | | | |
 ```
 
-To print all predefined chords, just do `banjo.print_chord_matrix()`.
+To print all predefined chords, just do:
 
-For guitar chords, just use `chordist.guitar.GuitarChord` and `chordist.guitar.Guitar` instead.
+```python
+from chordist.banjo import BASE_CHORDS
+
+BASE_CHORDS.print_matrix()
+```
+
+For guitar chords, just use `chordist.guitar.GuitarChord` and `chordist.guitar.BASE_CHORDS` instead.
 
 ## Lyrics
 
@@ -51,11 +57,12 @@ And [D7]roll in my sweet baby's [G]arms
 Here is how we can format them a bit nicer and also print the relevant banjo chords:
 
 ```python
-from chordist.banjo import Banjo
+from chordist.banjo import BASE_CHORDS
+from chordist.song import Song
 
-banjo = Banjo()
-chorus = lyrics.split("\n")  # lyrics = the above stuff as a string
-banjo.print_lyrics(chorus, title="Roll in My Sweet Baby's Arms")
+rows = lyrics.split("\n")  # lyrics = the above stuff as a string
+song = Song.create(lyrics=rows, chords=BASE_CHORDS, title="Roll in My Sweet Baby's Arms")
+song.print()
 ```
 
 Output:
@@ -75,16 +82,45 @@ Gonna lay around the shack
     D⁷                      G
 And roll in my sweet baby's arms
 
-___G___      __D⁷___      ___C___
-| | | |      | | 1 |      | | 1 |
-| | | |      | 2 | |      2 | | 3
-| | | |      | | | |      | | | |
-| | | |      | | | 4      | | | |
+___G___       __D⁷___       ___C___       ___C___          C
+| | | |       | | 1 |       | | 1 |       | | 1 |       1 1 1 1 5fr
+| | | |       | 2 | |       | | | 2       2 | | 3       | | | |
+| | | |       | | | |       | | | |       | | | |       | | | |
+| | | |       | | | 4       | | | |       | | | |       | | | |
 ```
 
-`print_lyrics()` also accepts an iterable of string iterables, in which case the outer iterables will be treated as separate verses and separated by blank rows.
+(There are 3 variations of the C chord among the base banjo chords. To only print the first variation, run `song.print(variations=False)`.)
 
-Some more examples in `abstract_instrument.py`.
+## Transposing
+
+Various objects can be transposed. Example using the song from above:
+
+```python
+song.transpose(2).print(variations=False)  # Up two half notes
+```
+
+Output:
+```
+Roll in My Sweet Baby's Arms
+============================
+
+A
+Roll in my sweet baby's arms
+                        E⁷
+Roll in my sweet baby's arms
+      A
+Gonna lay around the shack
+         D
+'Til the mail train comes back
+    E⁷                      A
+And roll in my sweet baby's arms
+
+___A___       __E⁷___       ___D___
+| | | |       | 1 | |       | | | |
+1 1 1 1       2 | | |       | 1 | |
+| | | |       | | | |       | | 2 |
+| | | |       | | | |       | | | 3
+```
 
 ## Bugs/caveats
 
