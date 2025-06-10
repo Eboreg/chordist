@@ -27,3 +27,20 @@ def split_before(iterable: Iterable[_T], pred: Callable[[list[_T]], bool]) -> "G
 
 def filter_not_none(iterable: Iterable[_T | None]) -> Iterable[_T]:
     return cast(Iterable[_T], filter(lambda item: item is not None, iterable))
+
+
+def split_by(iterable: Iterable[_T], pred: Callable[[_T], bool]) -> "Generator[tuple[_T | None, list[_T]]]":
+    header: _T | None = None
+    subrows: list[_T] = []
+
+    for item in iterable:
+        if pred(item):
+            if header or subrows:
+                yield header, subrows
+            header = item
+            subrows = []
+        else:
+            subrows.append(item)
+
+    if header or subrows:
+        yield header, subrows

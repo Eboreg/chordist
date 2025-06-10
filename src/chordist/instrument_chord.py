@@ -158,9 +158,11 @@ class InstrumentChordCollection(AbstractChordCollection[InstrumentChord]):
         ypad: int = YPAD,
         only_ascii: bool = False,
         variations: bool = True,
+        even_x_distance: bool = True,
     ) -> "Generator[str]":
         def test_row_length(l: list[InstrumentChord]):
-            return sum(c.get_width(pad=xpad, min_width=self.min_chord_width) for c in l) > maxlen
+            length = sum(c.get_width(pad=xpad, min_width=self.min_chord_width if even_x_distance else None) for c in l)
+            return length > maxlen
 
         chords: list[InstrumentChord] = []
         for chord in self.chords:
@@ -174,7 +176,14 @@ class InstrumentChordCollection(AbstractChordCollection[InstrumentChord]):
             for y in range(max((c.height for c in row), default=0)):
                 yield functools.reduce(
                     operator.add,
-                    [c.get_row(y, pad=xpad, min_width=self.min_chord_width, only_ascii=only_ascii) for c in row],
+                    [
+                        c.get_row(
+                            y,
+                            pad=xpad,
+                            min_width=self.min_chord_width if even_x_distance else None,
+                            only_ascii=only_ascii,
+                        ) for c in row
+                    ],
                 ).rstrip()
 
     def print_matrix(
@@ -184,6 +193,7 @@ class InstrumentChordCollection(AbstractChordCollection[InstrumentChord]):
         ypad: int = YPAD,
         only_ascii: bool = False,
         variations: bool = True,
+        even_x_distance: bool = True,
     ):
         for row in self.generate_matrix(
             maxlen=maxlen,
@@ -191,6 +201,7 @@ class InstrumentChordCollection(AbstractChordCollection[InstrumentChord]):
             ypad=ypad,
             only_ascii=only_ascii,
             variations=variations,
+            even_x_distance=even_x_distance,
         ):
             print(row)
 

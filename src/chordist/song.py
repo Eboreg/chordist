@@ -20,14 +20,15 @@ class Song:
     @classmethod
     def create(
         cls,
-        lyrics: Iterable[Iterable[str] | str],
+        lyrics: Iterable[Iterable[str] | str] | str,
         chords: InstrumentChordCollection | None = None,
-        title: str = "",
+        title: str | None = None,
+        chords_inline: bool = True,
     ):
         return Song(
-            title=title,
+            title=title or "",
             chords=chords or InstrumentChordCollection(),
-            lyrics=Lyrics.create(lyrics),
+            lyrics=Lyrics.create(lyrics=lyrics, chords_inline=chords_inline),
         )
 
     @classmethod
@@ -65,10 +66,19 @@ class Song:
         ypad: int = YPAD,
         only_ascii: bool = False,
         variations: bool = True,
+        chords_inline: bool = False,
+        even_x_distance: bool = True,
     ):
-        self.print_title_and_lyrics(only_ascii=only_ascii)
+        self.print_title_and_lyrics(only_ascii=only_ascii, chords_inline=chords_inline)
         print()
-        self.print_chords(maxlen=maxlen, xpad=xpad, ypad=ypad, only_ascii=only_ascii, variations=variations)
+        self.print_chords(
+            maxlen=maxlen,
+            xpad=xpad,
+            ypad=ypad,
+            only_ascii=only_ascii,
+            variations=variations,
+            even_x_distance=even_x_distance,
+        )
 
     def print_chords(
         self,
@@ -77,6 +87,7 @@ class Song:
         ypad: int = YPAD,
         only_ascii: bool = False,
         variations: bool = True,
+        even_x_distance: bool = True,
     ):
         self.used_chords.print_matrix(
             maxlen=maxlen,
@@ -84,16 +95,17 @@ class Song:
             ypad=ypad,
             only_ascii=only_ascii,
             variations=variations,
+            even_x_distance=even_x_distance,
         )
 
     def print_title(self):
         print(self.title)
-        print("=" * len(self.title), end="\n\n")
+        print("=" * len(self.title))
 
-    def print_title_and_lyrics(self, only_ascii: bool = False):
+    def print_title_and_lyrics(self, only_ascii: bool = False, chords_inline: bool = False):
         if self.title:
             self.print_title()
-        self.lyrics.print(only_ascii=only_ascii)
+        self.lyrics.print(only_ascii=only_ascii, chords_inline=chords_inline)
 
     def transpose(self, steps: int):
         return Song(
@@ -113,13 +125,19 @@ class SongCollection:
         for song in self.songs:
             self.used_chords.update(song.used_chords)
 
-    def add_song(self, song: Song):
-        self.songs.append(song)
-        self.used_chords.update(song.used_chords)
+    def add_songs(self, *songs: Song):
+        self.songs.extend(songs)
+        self.used_chords.update(*[s.used_chords for s in songs])
 
-    def create_song(self, lyrics: Iterable[Iterable[str] | str], title: str = "") -> Song:
-        song = Song.create(lyrics=lyrics, chords=self.chords, title=title)
-        self.add_song(song)
+    def create_song(
+        self,
+        lyrics: Iterable[Iterable[str] | str] | str,
+        title: str | None = None,
+        chords_inline: bool = True,
+    ) -> Song:
+        song = Song.create(lyrics=lyrics, chords=self.chords, title=title, chords_inline=chords_inline)
+        self.add_songs(song)
+
         return song
 
     def print(
@@ -130,18 +148,33 @@ class SongCollection:
         collect_chords: bool = True,
         only_ascii: bool = False,
         variations: bool = True,
+        chords_inline: bool = False,
+        even_x_distance: bool = True,
     ):
         for idx, song in enumerate(self.songs):
             if idx > 0:
                 print("\n")
-            song.print_title_and_lyrics(only_ascii)
+            song.print_title_and_lyrics(only_ascii, chords_inline=chords_inline)
             if not collect_chords:
                 print()
-                song.print_chords(only_ascii=only_ascii, maxlen=maxlen, xpad=xpad, ypad=ypad, variations=variations)
+                song.print_chords(
+                    only_ascii=only_ascii,
+                    maxlen=maxlen,
+                    xpad=xpad,
+                    ypad=ypad,
+                    variations=variations,
+                    even_x_distance=even_x_distance,
+                )
 
         if collect_chords:
             print()
-            self.print_chords(only_ascii=only_ascii, maxlen=maxlen, xpad=xpad, ypad=ypad)
+            self.print_chords(
+                only_ascii=only_ascii,
+                maxlen=maxlen,
+                xpad=xpad,
+                ypad=ypad,
+                even_x_distance=even_x_distance,
+            )
 
     def print_chords(
         self,
@@ -150,6 +183,7 @@ class SongCollection:
         ypad: int = YPAD,
         only_ascii: bool = False,
         variations: bool = True,
+        even_x_distance: bool = True,
     ):
         chords = self.used_chords.sorted(ascii=only_ascii)
         chords.print_matrix(
@@ -158,6 +192,7 @@ class SongCollection:
             ypad=ypad,
             only_ascii=only_ascii,
             variations=variations,
+            even_x_distance=even_x_distance,
         )
 
     def transpose(self, steps: int):

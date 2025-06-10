@@ -6,4 +6,5 @@
 **/.mypy_cache
 **/*.egg-info
 .directory
-/sommar.py
+/sommar*
+/test.py
