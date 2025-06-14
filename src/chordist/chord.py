@@ -1,4 +1,5 @@
-from chordist.abstract_chord import AbstractChord, Modifier, Modifiers
+from chordist.abstract_chord import AbstractChord
+from chordist.modifier import Modifier, Modifiers
 from chordist.note import Note, Notes
 
 

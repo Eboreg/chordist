@@ -4,6 +4,10 @@ from typing import Callable, Generator, Iterable, TypeVar, cast
 _T = TypeVar("_T")
 
 
+def filter_not_none(iterable: Iterable[_T | None]) -> Iterable[_T]:
+    return cast(Iterable[_T], filter(lambda item: item is not None, iterable))
+
+
 def split_before(iterable: Iterable[_T], pred: Callable[[list[_T]], bool]) -> "Generator[list[_T]]":
     """
     Yields lists of items from `iterable`, where each list ends just before an
@@ -23,10 +27,6 @@ def split_before(iterable: Iterable[_T], pred: Callable[[list[_T]], bool]) -> "G
 
     if sub:
         yield sub
-
-
-def filter_not_none(iterable: Iterable[_T | None]) -> Iterable[_T]:
-    return cast(Iterable[_T], filter(lambda item: item is not None, iterable))
 
 
 def split_by(iterable: Iterable[_T], pred: Callable[[_T], bool]) -> "Generator[tuple[_T | None, list[_T]]]":

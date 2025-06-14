@@ -1,9 +1,9 @@
 import functools
 import operator
 from abc import ABC
-from typing import Generator
+from typing import Generator, Iterable, Self
 
-from chordist.abstract_chord import AbstractChord, AbstractChordCollection
+from chordist.abstract_chord import AbstractChord
 from chordist.chord import Chord
 from chordist.constants import MAXLEN, XPAD, YPAD
 from chordist.instrument import Instrument
@@ -140,16 +140,40 @@ class InstrumentChord(AbstractChord, ABC):
             print(self.get_row(idx))
 
 
-class InstrumentChordCollection(AbstractChordCollection[InstrumentChord]):
+class InstrumentChordCollection:
+    chords: list[InstrumentChord]
+
     @property
     def min_chord_width(self) -> int | None:
         return max((c.min_width for c in self.chords), default=None)
 
-    def __add__(self, other):
+    def __init__(self, *chords: InstrumentChord):
+        self.chords = []
+        for chord in chords:
+            if chord not in self.chords:
+                self.chords.append(chord)
+
+    def __add__(self, other: "InstrumentChordCollection"):
         return InstrumentChordCollection(*self.chords, *other.chords)
+
+    def __iter__(self):
+        return iter(self.chords)
+
+    def __repr__(self):
+        return repr(self.chords)
+
+    def add(self, chord: InstrumentChord) -> Self:
+        if chord not in self.chords:
+            self.chords.append(chord)
+        return self
 
     def filter(self, name: str) -> "InstrumentChordCollection":
         return InstrumentChordCollection(*[c for c in self.chords if c == name])
+
+    def first(self) -> InstrumentChord | None:
+        if self.chords:
+            return self.chords[0]
+        return None
 
     def generate_matrix(
         self,
@@ -210,3 +234,9 @@ class InstrumentChordCollection(AbstractChordCollection[InstrumentChord]):
         return InstrumentChordCollection(
             *sorted(self.chords, key=lambda c: c.chord.name if not ascii else c.chord.ascii)
         )
+
+    def update(self, chords: Iterable[InstrumentChord]) -> Self:
+        for chord in chords:
+            if chord not in self.chords:
+                self.chords.append(chord)
+        return self

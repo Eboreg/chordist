@@ -11,11 +11,14 @@ class Song:
     chords: InstrumentChordCollection
     lyrics: Lyrics
     title: str = ""
-    used_chords: InstrumentChordCollection = dataclasses.field(default_factory=InstrumentChordCollection, init=False)
+    used_instrument_chords: InstrumentChordCollection = dataclasses.field(
+        default_factory=InstrumentChordCollection,
+        init=False,
+    )
 
     def __post_init__(self):
         for chord in self.lyrics.used_chords:
-            self.used_chords.update([c for c in self.chords if c == chord])
+            self.used_instrument_chords.update([c for c in self.chords if c == chord])
 
     @classmethod
     def create(
@@ -89,7 +92,7 @@ class Song:
         variations: bool = True,
         even_x_distance: bool = True,
     ):
-        self.used_chords.print_matrix(
+        self.used_instrument_chords.print_matrix(
             maxlen=maxlen,
             xpad=xpad,
             ypad=ypad,
@@ -119,15 +122,24 @@ class Song:
 class SongCollection:
     songs: list[Song] = dataclasses.field(default_factory=list)
     chords: InstrumentChordCollection = dataclasses.field(default_factory=InstrumentChordCollection)
-    used_chords: InstrumentChordCollection = dataclasses.field(default_factory=InstrumentChordCollection, init=False)
+    used_instrument_chords: InstrumentChordCollection = dataclasses.field(
+        default_factory=InstrumentChordCollection,
+        init=False,
+    )
 
     def __post_init__(self):
         for song in self.songs:
-            self.used_chords.update(song.used_chords)
+            self.used_instrument_chords.update(song.used_instrument_chords)
+
+    def __iter__(self):
+        return iter(self.songs)
+
+    def __len__(self):
+        return len(self.songs)
 
     def add_songs(self, *songs: Song):
         self.songs.extend(songs)
-        self.used_chords.update(*[s.used_chords for s in songs])
+        self.used_instrument_chords.update(*[s.used_instrument_chords for s in songs])
 
     def create_song(
         self,
@@ -185,7 +197,7 @@ class SongCollection:
         variations: bool = True,
         even_x_distance: bool = True,
     ):
-        chords = self.used_chords.sorted(ascii=only_ascii)
+        chords = self.used_instrument_chords.sorted(ascii=only_ascii)
         chords.print_matrix(
             maxlen=maxlen,
             xpad=xpad,

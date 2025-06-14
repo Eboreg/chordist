@@ -46,14 +46,15 @@ class LyricsRowPiece:
         return lyric
 
     def transpose(self, steps: int):
-        if self.chord_name and self.chord is None:
+        if not self.chord_name:
+            return self
+
+        if self.chord is None:
             raise ValueError(f"Could not transpose lyric '{self.lyric}': unidentified chord '{self.chord_name}'")
 
-        return LyricsRowPiece(
-            lyric=self.lyric,
-            chord_name=self.chord_name,
-            chord=self.chord.transpose(steps) if self.chord else None,
-        )
+        chord = self.chord.transpose(steps)
+
+        return LyricsRowPiece(lyric=self.lyric, chord_name=chord.name, chord=chord)
 
 
 @dataclasses.dataclass
@@ -102,14 +103,6 @@ class LyricsRow:
 
         return result.rstrip()
 
-    def get_lyrics_row(self, only_ascii: bool = False):
-        result = ""
-
-        for piece in self.pieces:
-            result += piece.get_lyric(only_ascii)
-
-        return result.rstrip(" -")
-
     def get_inline_row(self, only_ascii: bool = False):
         result = ""
 
@@ -117,6 +110,14 @@ class LyricsRow:
             result += piece.get_inline(only_ascii=only_ascii)
 
         return result.strip()
+
+    def get_lyrics_row(self, only_ascii: bool = False):
+        result = ""
+
+        for piece in self.pieces:
+            result += piece.get_lyric(only_ascii)
+
+        return result.rstrip(" -")
 
     def print(self, only_ascii: bool = False, chords_inline: bool = False):
         if chords_inline:
