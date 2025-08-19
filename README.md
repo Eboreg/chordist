@@ -9,7 +9,7 @@ Just run `pip install chordist` or `pipx install chordist`.
 When installed, the CLI command `chordist` will be made available.
 
 ```shell
-$ chordist
+$ chordist --help
 usage: chordist [-h] [--instrument {guitar,banjo}] [--file FILE] [--chords-inline] [--collect-chords] [--even-x-distance] [--maxlen MAXLEN] [--variations] [--ascii] [--transpose TRANSPOSE]
 
 options:
