@@ -1,5 +1,9 @@
 Some helpful stuff for displaying song chords (or just the bare chords) for string instruments.
 
+## Installation
+
+Just run `pip install chordist` or `pipx install chordist`.
+
 ## CLI
 
 When installed, the CLI command `chordist` will be made available.
