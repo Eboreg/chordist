@@ -1,4 +1,5 @@
 import dataclasses
+import re
 from typing import Iterable
 
 from chordist.constants import MAXLEN, XPAD, YPAD
@@ -33,6 +34,24 @@ class Song:
             chords=chords or InstrumentChordCollection(),
             lyrics=Lyrics.create(lyrics=lyrics, chords_inline=chords_inline),
         )
+
+    @classmethod
+    def from_string(
+        cls,
+        string: str,
+        chords: InstrumentChordCollection | None = None,
+        chords_inline: bool = True,
+    ):
+        title: str | None = None
+        string = string.strip().replace("\r\n", "\n")
+        rows = string.split("\n")
+
+        if rows:
+            if title_match := re.fullmatch(r"\*\*(.*)\*\*", rows[0]):
+                title = title_match.group(1)
+                rows = rows[1:]
+
+        return cls.create(lyrics=rows, chords=chords, chords_inline=chords_inline, title=title)
 
     @classmethod
     def print_example(cls, chords: InstrumentChordCollection):
@@ -149,8 +168,13 @@ class SongCollection:
     ) -> Song:
         song = Song.create(lyrics=lyrics, chords=self.chords, title=title, chords_inline=chords_inline)
         self.add_songs(song)
-
         return song
+
+    def create_songs_from_file(self, filename: str, chords_inline: bool = True):
+        with open(filename, "rt", encoding="utf8") as f:
+            text = f.read()
+        for song_text in re.split(r"(?:\r?\n){3,}", text):
+            self.add_songs(Song.from_string(string=song_text.strip(), chords=self.chords, chords_inline=chords_inline))
 
     def print(
         self,
@@ -186,6 +210,7 @@ class SongCollection:
                 xpad=xpad,
                 ypad=ypad,
                 even_x_distance=even_x_distance,
+                variations=variations,
             )
 
     def print_chords(

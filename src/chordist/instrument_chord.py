@@ -76,7 +76,7 @@ class InstrumentChord(AbstractChord, ABC):
 
     @property
     def height(self):
-        return max(self.end_fret - self.start_fret + 1, 5)
+        return self.end_fret - self.start_fret + 1
 
     @property
     def min_width(self):
@@ -154,7 +154,8 @@ class InstrumentChordCollection:
                 self.chords.append(chord)
 
     def __add__(self, other: "InstrumentChordCollection"):
-        return InstrumentChordCollection(*self.chords, *other.chords)
+        chords = sorted([*self.chords, *other.chords])
+        return InstrumentChordCollection(*chords)
 
     def __iter__(self):
         return iter(self.chords)
@@ -197,7 +198,7 @@ class InstrumentChordCollection:
         for idx, row in enumerate(rows):
             if idx > 0 and ypad:
                 yield "\n" * (ypad - 1)
-            for y in range(max((c.height for c in row), default=0)):
+            for y in range(max((c.height + 1 for c in row), default=0)):
                 yield functools.reduce(
                     operator.add,
                     [

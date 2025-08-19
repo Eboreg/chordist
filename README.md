@@ -1,6 +1,66 @@
 Some helpful stuff for displaying song chords (or just the bare chords) for string instruments.
 
-## Printing chords
+## CLI
+
+When installed, the CLI command `chordist` will be made available.
+
+```shell
+$ chordist
+usage: chordist [-h] [--instrument {guitar,banjo}] [--file FILE] [--chords-inline] [--collect-chords] [--even-x-distance] [--maxlen MAXLEN] [--variations] [--ascii] [--transpose TRANSPOSE]
+
+options:
+  -h, --help            show this help message and exit
+  --instrument {guitar,banjo}, -i {guitar,banjo}
+                        Default: guitar
+  --file FILE, -f FILE  Text file with songs; if absent, all chords for the instrument will be printed
+  --chords-inline       Input file uses the 'inlined chords' notation
+  --collect-chords      When printing multiple songs, output all chords at the bottom instead of individually for each song
+  --even-x-distance     Draw chords on equal distances horizontally
+  --maxlen MAXLEN       Maximum output row length (default: 50)
+  --variations          Print all available variations of each chord
+  --ascii               Print chords in their simplified, ASCII only forms
+  --transpose TRANSPOSE
+                        Transpose all chords in the input file by this number of half notes
+```
+
+### On the input text file
+
+A sequence of 2 or more empty rows will be interpreted as a boundary between two songs.
+
+If a song is prefixed by a line enclosed in `**` (two asteriskes), the string within will be used for the song title.
+
+Chords in the input file may be written in an inline fashion, like this:
+
+```
+**Roll in my sweet baby's arms**
+
+[G]Roll in my sweet baby's arms
+Roll in my sweet baby's [D7]arms
+Gonna [G]lay around the shack
+'Til the [C]mail train comes back
+And [D7]roll in my sweet baby's [G]arms
+```
+... or above the lyrics, like this:
+
+```
+**Roll in my sweet baby's arms**
+
+G
+Roll in my sweet baby's arms
+                        D7
+Roll in my sweet baby's arms
+      G
+Gonna lay around the shack
+         C
+'Til the mail train comes back
+    D7                      G
+And roll in my sweet baby's arms
+```
+Use the `--chords-inline` parameter for the former notation. Note that the notation needs to be consistent throughout the file.
+
+Chords may be written in the fancy, correct way ("A♭⁷", "C♯m⁷") or the simplified/ASCII way ("Ab7", "C#m7").
+
+## Defining chords
 
 A chord can be defined like so:
 
@@ -12,115 +72,6 @@ g = BanjoChord.create("G")
 ```
 
 ... where the arguments to `BanjoChord.create()` are the chord name followed by a tuple in the format `(fret number, string number, [finger number])` for each pressed string. String numbers are counted from the top/left, which I am sure somebody will take issue with (feel free to change this in your own fork in that case). The finger number can be omitted, in which case a `*` will be used. It can also be a string, for example `x` for muted strings.
-
-To output the chords above:
-
-```python
-from chordist.instrument_chord import InstrumentChordCollection
-
-chords = InstrumentChordCollection(em, g)
-chords.print_matrix()
-```
-
-This prints:
-
-```
-__Em___       ___G___
-| | | |       | | | |
-2 | | 3       | | | |
-| | | |       | | | |
-| | | |       | | | |
-```
-
-To print all predefined chords, just do:
-
-```python
-from chordist.banjo import BASE_CHORDS
-
-BASE_CHORDS.print_matrix()
-```
-
-For guitar chords, just use `chordist.guitar.GuitarChord` and `chordist.guitar.BASE_CHORDS` instead.
-
-## Lyrics
-
-Let's say we have a piece of lyrics with inlined chords, in this format:
-
-```
-[G]Roll in my sweet baby's arms
-Roll in my sweet baby's [D7]arms
-Gonna [G]lay around the shack
-'Til the [C]mail train comes back
-And [D7]roll in my sweet baby's [G]arms
-```
-
-Here is how we can format them a bit nicer and also print the relevant banjo chords:
-
-```python
-from chordist.banjo import BASE_CHORDS
-from chordist.song import Song
-
-rows = lyrics.split("\n")  # lyrics = the above stuff as a string
-song = Song.create(lyrics=rows, chords=BASE_CHORDS, title="Roll in My Sweet Baby's Arms")
-song.print()
-```
-
-Output:
-
-```
-Roll in My Sweet Baby's Arms
-============================
-
-G
-Roll in my sweet baby's arms
-                        D⁷
-Roll in my sweet baby's arms
-      G
-Gonna lay around the shack
-         C
-'Til the mail train comes back
-    D⁷                      G
-And roll in my sweet baby's arms
-
-___G___       __D⁷___       ___C___       ___C___          C
-| | | |       | | 1 |       | | 1 |       | | 1 |       1 1 1 1 5fr
-| | | |       | 2 | |       | | | 2       2 | | 3       | | | |
-| | | |       | | | |       | | | |       | | | |       | | | |
-| | | |       | | | 4       | | | |       | | | |       | | | |
-```
-
-(There are 3 variations of the C chord among the base banjo chords. To only print the first variation, run `song.print(variations=False)`.)
-
-## Transposing
-
-Various objects can be transposed. Example using the song from above:
-
-```python
-song.transpose(2).print(variations=False)  # Up two half notes
-```
-
-Output:
-```
-Roll in My Sweet Baby's Arms
-============================
-
-A
-Roll in my sweet baby's arms
-                        E⁷
-Roll in my sweet baby's arms
-      A
-Gonna lay around the shack
-         D
-'Til the mail train comes back
-    E⁷                      A
-And roll in my sweet baby's arms
-
-___A___       __E⁷___       ___D___
-| | | |       | 1 | |       | | | |
-1 1 1 1       2 | | |       | 1 | |
-| | | |       | | | |       | | 2 |
-| | | |       | | | |       | | | 3
-```
 
 ## Bugs/caveats
 
